@@ -8,11 +8,12 @@ import flask
 import logging
 
 # Our modules
-from src.letterbag import LetterBag
-from src.vocab import Vocab
-from src.jumble import jumbled
-import src.config as config
+from flask import request
 
+from vocab.src.letterbag import LetterBag
+from vocab.src.vocab import Vocab
+from vocab.src.jumble import jumbled
+import vocab.src.config as config
 
 ###
 # Globals
@@ -90,25 +91,33 @@ def check():
     text = request.args.get("text", type=str)
     jumble = flask.session["jumble"]
     matches = flask.session.get("matches", [])  # Default to empty list
+    app.logger.debug(text)
 
     # Is it good?
     in_jumble = LetterBag(jumble).contains(text)
     matched = WORDS.has(text)
 
-    result = {"matched": False, "you_found_word_already": False, "in_the_jumble": False, "success": False, "jumble": jumble, "text":""}
+    result = {"matched": False, "you_found_word_already": False, "in_the_jumble": False, "success": False, "jumble": jumble, "text": "", "matches":[]}
+
+    result["you_found_word_already"] = text in matches
+
+    print("text in matches", text in matches)
 
     # Respond appropriately
-    if matched and in_jumble and not (text in matches):
+    if matched and in_jumble and (not (text in matches)):
         # Cool, they found a new word
         matches.append(text)
-    
-    result["matched"] = WORDS.has(text)
+        flask.session["matches"] = matches
+
     result["you_found_word_already"] = text in matches
     result["in_the_jumble"] = in_jumble
     result["success"] = len(matches) >= flask.session["target_count"]
     result["text"] = text
+    result["matched"] = WORDS.has(text)
+    result["matches"] = matches
 
-    return flask.jsonify(result = result)
+    return flask.jsonify(result=result)
+
 
 ###############
 # AJAX request handlers
@@ -136,6 +145,7 @@ def format_filt(something):
     the Jinja2 code
     """
     return "Not what you asked for"
+
 
 ###################
 #   Error handlers
