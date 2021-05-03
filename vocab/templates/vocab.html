@@ -82,6 +82,7 @@
          </div>
 
          <p id="results"> </p>
+
          <p class="message"> </p>
 
          <script>
@@ -109,25 +110,26 @@
                            
                            function(data)
                            {
-                              result = data.result;
+                              var result = data.result;
 
                               if(result.success){
-                                 window.location.replace("/sucess");
+                                 window.location.replace("/success");
                               }
 
                               else if(!result.in_the_jumble){
-                                 $("#message").html(result.text + "can't be made from these letters" + result.jumble);
-                                 $("#attempt").val("");
+                                      $("#message").html(result.text + "can't be made from the the jumble of letters");
                               }
-                              
                               else if (result.you_found_word_already){
-                                 $("#message").html("You already found the word" + result.text);
-                                 $("#attempt").val("");
+                                  $("#message").html("You already found the word " + result.text);
+                                  $("#attempt").val("");
+                  http://flask.pocoo.org/docs/0.12/quickstart/#sessions            }
+                              else if (result.matched && result.in_the_jumble) {
+                                  $("#message").html("You found the word " + result.text);
+                                  $("#attempt").val("");
+                                  $("#results").html("You have found: " + result.matches)
                               }
-
                            }
                         );
-
                   });
          </script>
       </div>
